@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+marko = "==1.2.0"
+pydash = "*"
+
+[dev-packages]
+pytest-watch = "==2.0.0"
+pytest-cov = "*"
+notion-client = "*"
+pandas = "*"
+setuptools = "*"
+wheel = "*"
+twine = "*"
+
+[requires]
+python_version = "3.8"
