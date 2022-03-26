@@ -15,3 +15,5 @@ publish-test:
 publish:
 	python3 -m twine upload dist/*
 
+sample:
+	PYTHONPATH=. python samples/sample.py

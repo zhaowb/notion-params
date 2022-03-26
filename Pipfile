@@ -17,6 +17,7 @@ pandas = "*"
 setuptools = "*"
 wheel = "*"
 twine = "*"
+pytest-mock = "*"
 
 [requires]
 python_version = "3.8"
