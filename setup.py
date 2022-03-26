@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="notion-params",
-    version="0.0.1",
+    version="0.0.2",
     author="Wenbo Zhao",
     author_email="zhaowb@gmail.com",
     description="Helper to build Notion API params, parse markdown text into Notion API blocks",
@@ -19,6 +19,11 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    install_requires=['marko==1.2.0', 'pydash'],
+    install_requires=[
+        'marko==1.2.0',
+        'pydash',
+        'requests',
+        'backoff',
+    ],
     py_modules=['notion_params']
 )

@@ -36,3 +36,14 @@ custom markdown syntax to write callout
 """))
 ```
 
+
+Change log
+- 0.0.1 NotionParams and markdown parse
+  - `create_page`
+  - `update_page`
+  - `append_markdown`
+  - `table_df`, `table_df_rows`
+  - `create_database`, `create_database_row`
+  - `find_child`
+- 0.0.2 add a simple client, change doc of NotionParams methods to match
+

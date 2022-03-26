@@ -1,30 +1,35 @@
 from typing import Any, List, Mapping
 
 from .markdown import md, md_line
+from .client import Client
 
 
 class NotionParams:
-    md = md
-    md_line = md_line
-
     """
     Notion API reference https://developers.notion.com/reference/intro
     Find emoji https://emojipedia.org/people/
 
     ```
-    import notion_client
     from notion_params import NotionParams as NP
-    notion = notion_client.client.Client(auth='...token...')
+    notion = NP.get_client(token)  # or set token in env NOTION_TOKEN
     page_id = '7458781ba20644e0b85045209554ff3d'
-    page = notion.pages.retrieve(page_id=page_id)
+    page = notion.retrieve_page(page_id=page_id)
 
     # create sub page, with markdown text
-    sub_page = notion.pages.create(**NP.create_page(
+    sub_page = notion.create_page(**NP.create_page(
         page['id'], title='...', emoji='😆',
         text="markdown content", 
     )
     ```
     """
+
+    md = md
+    md_line = md_line
+
+    @staticmethod
+    def get_client(token=None):
+        return Client(token=token)
+
     @staticmethod
     def create_page(parent_page_id: str, *, title: str, text: str = None, emoji: str = None):
         """
@@ -87,13 +92,8 @@ class NotionParams:
 
     @staticmethod
     def append_markdown(text: str):
-        """
-        ```
-        notion.blocks.children.append(
-            block_id=sub_page['id'],
-            **NotionParams.append_markdown("markdown text here"),
-        )
-        ```
+        """options in https://developers.notion.com/reference/patch-block-children
+        Usage: `client.append_block_children(block_id, **NP.append_markdown('markdown text'))`
         """
         return {
             'children': md(text),

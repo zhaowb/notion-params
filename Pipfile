@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 marko = "==1.2.0"
 pydash = "*"
+requests = "*"
+backoff = "*"
 
 [dev-packages]
 pytest-watch = "==2.0.0"
