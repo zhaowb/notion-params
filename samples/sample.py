@@ -73,9 +73,9 @@ See more demos in [sample.py](https://raw.githubusercontent.com/zhaowb/notion-pa
 
     notion.append_block_children(sub_page['id'], **NP.append_markdown(
         """# Table demo
+Note: data is randomly created via [convertcsv.com](https://www.convertcsv.com/generate-test-data.htm).
 Use API `append_block_children()`.
-Use `NP.table_df()` help to create params describe the table.
-Use `NP.table_df_rows()` help to create params for the rows.
+Use helper `NP.table_df()` to create params describe the table,  `NP.table_df_rows()` to create params for the rows.
 """
     ))
     response = notion.append_block_children(
@@ -102,8 +102,8 @@ When table is small enough, it can be created in one call:
 
     notion.append_block_children(sub_page['id'], **NP.append_markdown(
         """# Database demo
-Use API `create_database()` create database.
-Use API `create_page(**NP.create_database_row)` to add rows.
+Note: data is randomly created via [convertcsv.com](https://www.convertcsv.com/generate-test-data.htm).
+Use API `create_database()` create database, `create_page(**NP.create_database_row)` to add rows.
 Use `NP.create_database()` and `NP.create_database_row()` help to create params.
 """
     ))
@@ -239,7 +239,7 @@ End of sample page
     ))
     # change title to indicate done
     notion.update_page(sub_page['id'], **NP.update_page(
-        title='notion_params sample page (done)',
+        title='notion_params sample page',
         emoji='😀',
     ))
 
