@@ -16,4 +16,4 @@ publish:
 	python3 -m twine upload dist/*
 
 sample:
-	PYTHONPATH=. python samples/sample.py
+	PYTHONPATH=. python samples/sample.py '7458781ba20644e0b85045209554ff3d'

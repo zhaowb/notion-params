@@ -1,3 +1,4 @@
+import json
 import os
 from typing import Any, Iterator
 from urllib.parse import urljoin
@@ -58,6 +59,7 @@ class Client:
             "Content-Type": "application/json",
             "Authorization": f"Bearer {token}"
         })
+        self._last_exc = None
 
     @backoff.on_exception(
         # retry 429 until succ or other error
@@ -76,10 +78,29 @@ class Client:
         interval=2,  # 2 seconds
         jitter=None,
     )
-    def _request(self, url, **kw):
+    def _request_core(self, url, **kw):
         r = self._session.request(url=urljoin(NOTION_BASE_URL, url), **kw)
         r.raise_for_status()
         return r.json()
+
+    def _request(self, url, **kw):
+        """save exception for diagnostic"""
+        try:
+            return self._request_core(url, **kw)
+        except requests.exceptions.HTTPError as exc:
+            self._last_exc = exc
+            if str(os.environ.get('NOTION_PARAMS_SHOW_LAST_EXC') or '').lower() in ('yes', 'y', 'true', 't', '1'):
+                self._show_last_exc()
+            raise
+    
+    def _show_last_exc(self):
+        exc = self._last_exc
+        if not exc:
+            return
+        if exc.response is not None:
+            print('Response', exc.response.status_code, exc.response.text)
+        if exc.request is not None:
+            print('Request body', exc.request.body)
 
     def _api(self, method, url, vars=None):
         params = make_params(vars) if vars else None

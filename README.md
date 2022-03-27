@@ -1,43 +1,17 @@
-# notion-params
-Helper to build Notion API params, parse markdown text into Notion API blocks
+# Introduction of `notion-params`
+This is a helper to build Notion API params, parse markdown text into Notion API blocks,
+include a simple client support all APIs version '2022-02-22'.
 
 ![](https://raw.githubusercontent.com/zhaowb/notion-params/main/screenshots/Demo-README.png)
 
-```
-import notion_client
-from notion_params import NotionParams as NP
+![](https://raw.githubusercontent.com/zhaowb/notion-params/main/screenshots/Demo-README-table.png)
+
+![](https://raw.githubusercontent.com/zhaowb/notion-params/main/screenshots/Demo-README-database.png)
+
+See more demos in [sample.py](https://raw.githubusercontent.com/zhaowb/notion-params/main/samples/sample.py): `python sample.py {page_id}` where page_id is a notion page your token has permission to write. This sample code will create a sub page to show all the demos.
 
 
-def demo():
-    notion = notion_client.client.Client(auth=os.environ['NOTION_TOKEN'])
-    page_id = '7458781ba20644e0b850452095000000'
-    sub_page = notion.pages.create(**NP.create_page(
-        page_id,
-        title='title text',
-        emoji='😀',
-        text="""# H1 title
-Text text text
-
-> quote
->
->> sub quote
->> more text
-
-!!callout
-custom markdown syntax to write callout
-
-- list item abc
-- another list item
-
-1. ordered list sample
-1. second item
-
-...
-"""))
-```
-
-
-Change log
+# Change log
 - 0.0.1 NotionParams and markdown parse
   - `create_page`
   - `update_page`
@@ -46,4 +20,6 @@ Change log
   - `create_database`, `create_database_row`
   - `find_child`
 - 0.0.2 add a simple client, change doc of NotionParams methods to match
+  - client.py support all APIs version 2022-02-22
+  - add sample.py show demos in a sample page
 
