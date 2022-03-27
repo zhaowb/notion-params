@@ -12,12 +12,32 @@ NOTION_BASE_URL = 'https://api.notion.com'
 NOTION_VERSION = '2022-02-22'
 
 
-def copy_options(vars, names):
-    return {
+def make_params(vars):
+    """quick hacky way to build body params
+    vars is locals() passed from each api endpoint, eg query_database().
+    This function copies every var if
+        - it's not 'self' or 'kw'
+        - not start with '_':
+            in case any api endpoint code need local var, it should start with _
+        - not end with '_id':
+            all url params are also defined in api endpoint functions
+            they all like '*_id', eg page_id, block_id etc
+    The goal is to minimize api endpoint code, easier to read and match to official document.
+    This is less hacky than using inspect :D and still kind of readable/maintainable
+        and api endpoint code is minimal enough.
+    """
+    params = {
         name: vars[name]
-        for name in names
+        for name in vars
+        if name not in ('self', 'kw')  # skip self and kw
+        and name[0] != '_'   # skip possible local use vars
+        and not name.endswith('_id')  # skip url params
         if vars.get(name) is not None
     }
+    if 'kw' in vars:
+        # copy everything under 'kw'
+        params.update(vars['kw'])
+    return params
 
 
 class Client:
@@ -27,6 +47,7 @@ class Client:
     client.append_block_children(block_id, **NP.append_markdown('markdown text'))
     ```
     """
+
     def __init__(self, token: str = None) -> None:
         if token is None:
             token = os.environ.get('NOTION_TOKEN')
@@ -60,14 +81,14 @@ class Client:
         r.raise_for_status()
         return r.json()
 
-    def _api(self, method, url, vars=None, options=None):
-        params = copy_options(vars, options) if vars else None
+    def _api(self, method, url, vars=None):
+        params = make_params(vars) if vars else None
         return self._request(url=url, method=method, json=params)
 
-    def _paginate(self, *, method, url, vars, options) -> Iterator[Any]:
+    def _paginate(self, method, url, vars) -> Iterator[Any]:
         # https://developers.notion.com/reference/pagination
         """kw['json'] can have start_cursor, page_size, see sample query_database()"""
-        params = copy_options(vars, options)
+        params = make_params(vars)
         while True:
             response = self._request(url=url, method=method, json=params)
             yield from response.get('results') or []
@@ -81,15 +102,16 @@ class Client:
 
     def query_database(self, database_id, *, filter=None, sorts=None, start_cursor=None, page_size=None) -> Iterator[Any]:
         """https://developers.notion.com/reference/post-database-query"""
-        yield from self.paginate('post', f'/v1/databases/{database_id}/query', locals(), ['filter', 'sorts', 'start_cursor', 'page_size'])
+        yield from self._paginate('post', f'/v1/databases/{database_id}/query', locals())
 
-    def create_database(self, *, parent, properties, title=None) -> dict:
+    def create_database(self, *, parent, properties, title=None, icon=None, cover=None) -> dict:
         """https://developers.notion.com/reference/create-a-database"""
-        return self._api('post', '/v1/databases', locals(), ['parent', 'properties', 'title'])
+        # Note: 'icon' and 'cover' are not listed in document but showed in sample
+        return self._api('post', '/v1/databases', locals())
 
     def update_database(self, database_id, *, title=None, properties=None):
         """https://developers.notion.com/reference/update-a-database"""
-        return self._api('patch', f'/v1/databases/{database_id}', locals(), ['title', 'properties'])
+        return self._api('patch', f'/v1/databases/{database_id}', locals())
 
     def retrieve_database(self, database_id, ):
         """https://developers.notion.com/reference/retrieve-a-database"""
@@ -101,15 +123,15 @@ class Client:
 
     def create_page(self, *, parent, properties, children=None, icon=None, cover=None):
         """https://developers.notion.com/reference/post-page"""
-        return self._api('post', '/v1/pages', locals(), ['parent', 'properties', 'children', 'icon', 'cover'])
+        return self._api('post', '/v1/pages', locals())
 
     def update_page(self, page_id, *, properties=None, archived=None, icon=None, cover=None):
         """https://developers.notion.com/reference/patch-page"""
-        return self._api('patch', f'/v1/pages/{page_id}', locals(), ['properties', 'archived', 'icon', 'cover'])
+        return self._api('patch', f'/v1/pages/{page_id}', locals())
 
     def retrieve_page_property_item(self, page_id, property_id, *, start_cursor=None, page_size=None):
         """https://developers.notion.com/reference/retrieve-a-page-property"""
-        yield from self._paginate('get', f'/v1/pages/{page_id}/properties/{property_id}', locals(), ['start_cursor', 'page_size'])
+        yield from self._paginate('get', f'/v1/pages/{page_id}/properties/{property_id}', locals())
 
     def retrieve_block(self, block_id):
         """https://developers.notion.com/reference/retrieve-a-block"""
@@ -119,15 +141,15 @@ class Client:
         """https://developers.notion.com/reference/update-a-block
         (kw is) the block object type value with the properties to be updated. Currently only text (for supported block types) and checked (for to_do blocks) fields can be updated.
         """
-        return self._api('patch', f'/v1/blocks/{block_id}', {**locals(), **kw}, ['archived'] + list(kw))
+        return self._api('patch', f'/v1/blocks/{block_id}', {**locals(), **kw})
 
     def retrieve_block_children(self, block_id, *, start_cursor=None, page_size=None):
         """https://developers.notion.com/reference/get-block-children"""
-        yield from self._paginate('get', f'/v1/blocks/{block_id}/children', locals(), ['start_cursor', 'page_size'])
+        yield from self._paginate('get', f'/v1/blocks/{block_id}/children', locals())
 
     def append_block_children(self, block_id, *, children):
         """https://developers.notion.com/reference/patch-block-children"""
-        return self._api('patch', f'/v1/blocks/{block_id}/children', locals(), ['children'])
+        return self._api('patch', f'/v1/blocks/{block_id}/children', locals())
 
     def delete_block(self, block_id):
         """https://developers.notion.com/reference/delete-a-block"""
@@ -139,8 +161,12 @@ class Client:
 
     def list_users(self, *, start_cursor=None, page_size=None):
         """https://developers.notion.com/reference/get-users"""
-        yield from self._paginate('get', f'/v1/users', locals(), ['start_cursor', 'page_size'])
+        yield from self._paginate('get', f'/v1/users', locals())
 
     def retrieve_bot_user(self):
         """https://developers.notion.com/reference/get-self"""
         return self._api('get', '/v1/users/me')
+
+    def search(self, *, query=None, sort=None, filter=None, start_cursor=None, page_size=None):
+        """https://developers.notion.com/reference/post-search"""
+        yield from self._paginate('post', '/v1/search', locals())
