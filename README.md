@@ -25,4 +25,5 @@ See more demos in [sample.py](https://raw.githubusercontent.com/zhaowb/notion-pa
 - 0.0.2 add a simple client, change doc of NotionParams methods to match
   - client.py support all APIs version 2022-02-22
   - add sample.py show demos in a sample page
+- 0.0.3 add `df_columns_add_prefix_for_database` to enforce database columns order
 

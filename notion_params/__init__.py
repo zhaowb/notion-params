@@ -171,6 +171,14 @@ class NotionParams:
         ).tolist()
 
     @staticmethod
+    def df_columns_add_prefix_for_database(df):
+        width = (len(df.columns)-1)//10 + 1  # 2 cols -> 1 digits, 10 cols -> 1 digits, 11 cols -> 2 digits
+        return df.rename(columns={
+            col: f'{str(i).zfill(width)}-{col}'
+            for i, col in enumerate(df.columns[1:])
+        })
+
+    @staticmethod
     def create_database(page_id, *, title: str, columns: List[str], column_types: Mapping[str, str] = None, emoji: str = None):
         # https://developers.notion.com/reference/create-a-database
         """

@@ -113,6 +113,8 @@ Use `NP.create_database()` and `NP.create_database_row()` help to create params.
         columns=df.columns,
     ))
     for _, row in df.iterrows():
+        # iterrows may be slow than other methods (https://stackoverflow.com/a/55557758/6521459)
+        # but here performance is not important because network is much slower than iteration
         notion.create_page(**NP.create_database_row(
             db_id=db['id'],
             row=row,
