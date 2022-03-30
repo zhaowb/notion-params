@@ -27,4 +27,4 @@ See more demos in [sample.py](https://raw.githubusercontent.com/zhaowb/notion-pa
   - add sample.py show demos in a sample page
 - 0.0.3 add `df_columns_add_prefix_for_database` to enforce database columns order
 - 0.0.4 `table_df()` add options pass to notion API control row/column headers
-
+- 0.0.5 bugfix

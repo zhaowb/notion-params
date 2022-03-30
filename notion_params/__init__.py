@@ -119,25 +119,26 @@ class NotionParams:
         ```
         """
         # https://developers.notion.com/reference/block#table-blocks
+        header_row = [
+            {
+                "type": "table_row",
+                "table_row": {
+                    "cells": [
+                        [{
+                            "text": {"content": col}
+                        }]
+                        for col in df.columns
+                    ]
+                }
+            }
+        ] if has_column_header else []
         return {
             'type': 'table',
             'table': {
                 "table_width": len(df.columns),
                 "has_column_header": has_column_header,
                 "has_row_header": has_row_header,
-                "children": [
-                    {
-                        "type": "table_row",
-                        "table_row": {
-                            "cells": [
-                                [{
-                                    "text": {"content": col}
-                                }]
-                                for col in df.columns
-                            ]
-                        }
-                    }
-                ] + NotionParams.table_df_rows(df[:include_rows])
+                "children": header_row + NotionParams.table_df_rows(df[:include_rows])
             }
         }
 
