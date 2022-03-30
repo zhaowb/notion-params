@@ -100,7 +100,7 @@ class NotionParams:
         }
 
     @staticmethod
-    def table_df(df, include_rows=0):
+    def table_df(df, include_rows=0, has_row_header=True, has_column_header=True):
         """convert DataFrame to one table block
         :param include_rows: number of rows to include, default only include header
             too many rows may cause result too large
@@ -123,8 +123,8 @@ class NotionParams:
             'type': 'table',
             'table': {
                 "table_width": len(df.columns),
-                "has_column_header": True,
-                "has_row_header": True,
+                "has_column_header": has_column_header,
+                "has_row_header": has_row_header,
                 "children": [
                     {
                         "type": "table_row",
