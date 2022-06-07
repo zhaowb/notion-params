@@ -3,7 +3,7 @@ import warnings
 
 import marko
 import pydash
-from marko.ext.gfm.elements import Strikethrough
+import marko.ext.gfm.elements
 
 # see https://developers.notion.com/reference/rich-text#annotations
 NOTION_COLOR_NAMES = "gray", "brown", "orange", "yellow", "green", "blue", "purple", "pink", "red"
@@ -11,7 +11,7 @@ NOTION_COLOR_NAMES = "gray", "brown", "orange", "yellow", "green", "blue", "purp
 def decode_style(code):
     """simple <span style> decoder
     :param code: inline html code, eg "<span style='color:blue'>" or "</span>" or any other inline html code
-    :returns: 
+    :returns:
         if style match, return notion color code, "red", "blue" etc, see NOTION_COLOR_NAMES
         if /span return '/'
         otherwise return ''
@@ -144,6 +144,9 @@ class MarkoNotionRenderer(marko.Renderer):
 
     def render_paragraph(self, element):
         # https://developers.notion.com/reference/block#paragraph-blocks
+        # if hasattr(element, 'checked'):
+        #     # see https://github.com/frostming/marko/blob/master/marko/ext/gfm/__init__.py#L35
+        #     return self._render_as("to_do", element)
         return self._render_as("paragraph", element)
 
     def _text(self, element, bold=False, italic=False, strikethrough=False, underline=False, code=False, color: str = 'default', url=None):
@@ -320,11 +323,45 @@ class MarkoNotionRenderer(marko.Renderer):
         # code span is inline code
         return self._text(element, code=True)
 
+    def render_table(self, element):
+        headers, _rows = element.children[0], element.children[1:]
+        return {
+            'type': 'table',
+            'table': {
+                'table_width': len(headers.children),
+                "has_column_header": True,
+                "has_row_header": True,
+                "children": [self.render(row) for row in element.children]
+            }
+        }
+
+    def render_table_row(self, element):
+        return {
+            "type": "table_row",
+            "table_row": {
+                "cells": [
+                    self.render(cell) for cell in element.children
+                    # [{
+                    #     "text": {"content": col}
+                    # }]
+                    # for col in df.columns
+                ]
+            }
+        }
+
+    def render_table_cell(self, element):
+        return [self._text(element)]
+
 
 class MarkoNotionExt:
     # see https://github.com/frostming/marko/blob/master/marko/ext/gfm/__init__.py#L79
-    elements = [Strikethrough]
-
+    elements = [
+        marko.ext.gfm.elements.Paragraph,
+        marko.ext.gfm.elements.Strikethrough,
+        marko.ext.gfm.elements.Table,
+        marko.ext.gfm.elements.TableRow,
+        marko.ext.gfm.elements.TableCell,
+    ]
 
 _md = marko.Markdown(marko.Parser, MarkoNotionRenderer)
 _md.use(MarkoNotionExt)

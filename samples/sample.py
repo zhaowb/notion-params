@@ -62,6 +62,11 @@ custom markdown syntax to write callout
 1. ordered list sample
 1. second item
 
+| Syntax | Description |
+| --- | ----------- |
+| Header | Title |
+| Paragraph | Text |
+
 ...
 
 See more demos in [sample.py](https://raw.githubusercontent.com/zhaowb/notion-params/main/samples/sample.py)

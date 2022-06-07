@@ -284,3 +284,94 @@ test 123
 def test_unsupport_heading_more_than_3():
     with pytest.raises(NotImplementedError):
         md('#### heading 4 will fail')
+
+
+def test_gfm_table():
+    # copy sample from https://www.markdownguide.org/extended-syntax/#tables
+    result = md("""Table demo
+
+| Syntax | Description |
+| --- | ----------- |
+| Header | Title |
+| Paragraph | Text |
+
+Next line
+""")
+    print(json.dumps(result, indent=4))
+    assert result == [
+        {
+            "type": "paragraph",
+            "paragraph": {
+                "rich_text": [{"text": {"content": "Table demo"}}]
+            }
+        },
+        {
+            "type": "paragraph",
+            "paragraph": {
+                "rich_text": [{"text": {"content": ""}}]
+            }
+        },
+        {
+            "type": "table",
+            "table": {
+                "table_width": 2,
+                "has_column_header": True,
+                "has_row_header": True,
+                "children": [
+                    {
+                        "type": "table_row",
+                        "table_row": {
+                            "cells": [
+                                [{"text": {"content": "Syntax"}}],
+                                [{"text": {"content": "Description"}}]
+                            ]
+                        }
+                    },
+                    {
+                        "type": "table_row",
+                        "table_row": {
+                            "cells": [
+                                [{"text": {"content": "Header"}}],
+                                [{"text": {"content": "Title"}}]
+                            ]
+                        }
+                    },
+                    {
+                        "type": "table_row",
+                        "table_row": {
+                            "cells": [
+                                [{"text": {"content": "Paragraph"}}],
+                                [{"text": {"content": "Text"}}]
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "paragraph",
+            "paragraph": {
+                "rich_text": [{"text": {"content": ""}}]
+            }
+        },
+        {
+            "type": "paragraph",
+            "paragraph": {
+                "rich_text": [{"text": {"content": "Next line"}}]
+            }
+        }
+    ]
+
+
+def test_todo():
+    # copy sample from https://www.markdownguide.org/extended-syntax/#task-lists
+    result = md("""TO DO list demo
+- [x] Write the press release
+- [ ] Update the website
+- [ ] Contact the media
+
+Next line
+""")
+    print(json.dumps(result, indent=4))
+    assert False, 'TODO'
+ 
